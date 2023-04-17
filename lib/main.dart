@@ -1,9 +1,12 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:convert' as convert;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:skyline/pages/hourly_screen.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:http/http.dart' as http;
 
 import 'pages/weekly_screen.dart';
 
@@ -42,9 +45,44 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  var city = 'Natal';
+  var lat = '';
+  var long = '';
+  final textController = TextEditingController();
+  @override
+  void dispose() {
+    textController.dispose();
+    super.dispose();
+  }
+
+  Future getLocation(String city) async {
+    var apikey = 'f47d0c7f86f35258f275abc8fa10f6d5';
+    var url =
+        'http://api.openweathermap.org/geo/1.0/direct?q=$city&appid=$apikey';
+
+    http.Response response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      var apiData = convert.jsonDecode(response.body);
+
+      setState(() {
+        city = apiData[0]['name'].toString();
+        lat = apiData[0]['lat'].toString();
+        long = apiData[0]['lon'].toString();
+      });
+    }
+  }
+
+  void _printLatestValue() {
+    print('Second text field: ${textController.text}');
+  }
+
   @override
   void initState() {
+    textController.addListener(_printLatestValue);
+    textController.text = 'Natal';
     super.initState();
+
     initialization();
   }
 
@@ -93,10 +131,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                          child: Text(
-                            'Search Location',
-                            style: TextStyle(
-                                color: Color.fromRGBO(11, 36, 71, 100)),
+                          child: SizedBox(
+                            height: 20,
                           ),
                         ),
                       ],
@@ -114,11 +150,34 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               height: 20,
             ),
+            Container(
+              height: 30,
+              decoration: BoxDecoration(
+                color: Colors.white,
+              ),
+              child: TextField(
+                controller: textController,
+                onChanged: (text) {
+                  Duration(seconds: 2);
+                  getLocation(text);
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search location',
+                  hintStyle: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                  ),
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
             Expanded(
               child: PageView(
                 controller: controller,
                 children: [
-                  HourlyScreen(),
+                  HourlyScreen(
+                    city: city,
+                  ),
                   WeeklyScreen(),
                 ],
               ),

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import '../components/mini_info.dart';
 
 class HourlyScreen extends StatelessWidget {
-  const HourlyScreen({super.key});
-
+  const HourlyScreen({super.key, required this.city});
+  final String city;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +25,7 @@ class HourlyScreen extends StatelessWidget {
                       size: 20,
                     ),
                     Text(
-                      ' Natal',
+                      ' $city',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
