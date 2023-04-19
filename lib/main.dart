@@ -45,10 +45,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var city = 'Natal';
+  var city = '';
   var lat = '';
   var long = '';
   final textController = TextEditingController();
+  final controller = PageController(keepPage: true);
   @override
   void dispose() {
     textController.dispose();
@@ -71,16 +72,12 @@ class _MyHomePageState extends State<MyHomePage> {
         long = apiData[0]['lon'].toString();
       });
     }
-  }
-
-  void _printLatestValue() {
-    print('Second text field: ${textController.text}');
+    print(lat);
   }
 
   @override
   void initState() {
-    textController.addListener(_printLatestValue);
-    textController.text = 'Natal';
+    textController.text = '';
     super.initState();
 
     initialization();
@@ -88,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void initialization() async {
     const Center(
-      child: Text('Logo', style: TextStyle(color: Colors.black)),
+      child: Text('Logo', style: TextStyle(color: Colors.black, fontSize: 30)),
     );
     await Future.delayed(const Duration(seconds: 3));
 
@@ -98,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     // final now = DateTime.now();
-    final controller = PageController(keepPage: true);
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -122,17 +119,32 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: EdgeInsets.only(left: 12.0),
-                          child: Icon(
-                            Icons.search,
-                            color: Color.fromRGBO(11, 36, 71, 100),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                          child: SizedBox(
-                            height: 20,
+                        Container(
+                          height: 40,
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(12))),
+                          child: Center(
+                            child: TextField(
+                              textAlign: TextAlign.center,
+                              controller: textController,
+                              onChanged: (text) {
+                                getLocation(text);
+                                setState(() {
+                                  city = text;
+                                });
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Search location',
+                                hintStyle: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 18,
+                                ),
+                                border: InputBorder.none,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -150,33 +162,14 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               height: 20,
             ),
-            Container(
-              height: 30,
-              decoration: BoxDecoration(
-                color: Colors.white,
-              ),
-              child: TextField(
-                controller: textController,
-                onChanged: (text) {
-                  Duration(seconds: 2);
-                  getLocation(text);
-                },
-                decoration: InputDecoration(
-                  hintText: 'Search location',
-                  hintStyle: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                  ),
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
             Expanded(
               child: PageView(
                 controller: controller,
                 children: [
                   HourlyScreen(
                     city: city,
+                    lat: lat,
+                    long: long,
                   ),
                   WeeklyScreen(),
                 ],

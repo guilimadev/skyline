@@ -1,12 +1,53 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'dart:convert' as convert;
 
 import '../components/mini_info.dart';
+import 'package:http/http.dart' as http;
 
-class HourlyScreen extends StatelessWidget {
-  const HourlyScreen({super.key, required this.city});
+class HourlyScreen extends StatefulWidget {
+  const HourlyScreen(
+      {super.key, required this.city, required this.lat, required this.long});
+  final String lat;
+  final String long;
   final String city;
+
+  @override
+  State<HourlyScreen> createState() => _HourlyScreenState();
+}
+
+class _HourlyScreenState extends State<HourlyScreen> {
+  int temperature = 0;
+  int feelsLike = 0;
+  int temp_min = 0;
+  int temp_max = 0;
+
+  Future getWeather(String latTemp, String longTemp) async {
+    var apikey = 'f47d0c7f86f35258f275abc8fa10f6d5';
+    var url =
+        'https://api.openweathermap.org/data/2.5/weather?lat=$latTemp&lon=$longTemp&appid=$apikey&units=metric';
+
+    http.Response response = await http.get(Uri.parse(url));
+    print('Entrei');
+    if (response.statusCode == 200) {
+      var apiData = convert.jsonDecode(response.body);
+
+      setState(() {
+        temperature = apiData['main']['temp'].round();
+        feelsLike = apiData['main']['feels_like'].round();
+        temp_min = apiData['main']['temp_min'].round();
+        temp_max = apiData['main']['temp_max'].round();
+      });
+      print(apiData);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,11 +66,28 @@ class HourlyScreen extends StatelessWidget {
                       size: 20,
                     ),
                     Text(
-                      ' $city',
+                      ' ${widget.city}',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        getWeather(widget.lat, widget.long);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(12))),
+                        height: MediaQuery.of(context).size.height * 0.03,
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        child: Center(child: Text('Get Weather')),
                       ),
                     ),
                   ],
@@ -54,7 +112,7 @@ class HourlyScreen extends StatelessWidget {
                       size: 60,
                     ),
                     Text(
-                      ' 31ºC',
+                      ' $temperature',
                       style: TextStyle(
                           fontSize: 60,
                           color: Colors.white,
@@ -63,7 +121,7 @@ class HourlyScreen extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  '30º/24º Feels like 31º',
+                  '$temp_maxº/$temp_minº Feels like $feelsLikeº',
                   style: TextStyle(
                       fontSize: 20,
                       color: Colors.white,
