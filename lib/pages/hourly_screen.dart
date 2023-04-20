@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, non_constant_identifier_names
 
 import 'package:flutter/material.dart';
 import 'dart:convert' as convert;
@@ -22,6 +22,11 @@ class _HourlyScreenState extends State<HourlyScreen> {
   int feelsLike = 0;
   int temp_min = 0;
   int temp_max = 0;
+  int clouds = 0;
+  String description = '';
+  String icon_url = '';
+  int date = 0;
+  bool isReady = false;
 
   Future getWeather(String latTemp, String longTemp) async {
     var apikey = 'f47d0c7f86f35258f275abc8fa10f6d5';
@@ -29,7 +34,7 @@ class _HourlyScreenState extends State<HourlyScreen> {
         'https://api.openweathermap.org/data/2.5/weather?lat=$latTemp&lon=$longTemp&appid=$apikey&units=metric';
 
     http.Response response = await http.get(Uri.parse(url));
-    print('Entrei');
+
     if (response.statusCode == 200) {
       var apiData = convert.jsonDecode(response.body);
 
@@ -38,8 +43,12 @@ class _HourlyScreenState extends State<HourlyScreen> {
         feelsLike = apiData['main']['feels_like'].round();
         temp_min = apiData['main']['temp_min'].round();
         temp_max = apiData['main']['temp_max'].round();
+        clouds = apiData['clouds']['all'];
+        description = apiData['weather'][0]['description'];
+        icon_url = apiData["weather"][0]["icon"];
+        date = apiData['dt'];
+        isReady = true;
       });
-      print(apiData);
     }
   }
 
@@ -51,6 +60,7 @@ class _HourlyScreenState extends State<HourlyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Column(
@@ -87,138 +97,155 @@ class _HourlyScreenState extends State<HourlyScreen> {
                                 BorderRadius.all(Radius.circular(12))),
                         height: MediaQuery.of(context).size.height * 0.03,
                         width: MediaQuery.of(context).size.width * 0.3,
-                        child: Center(child: Text('Get Weather')),
+                        child: Center(
+                          child: Text('Get Weather'),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                Text(
-                  'Thu, Apr 13, 2023',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-                SizedBox(
-                  height: 30,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.wb_sunny_outlined,
-                      color: Colors.white,
-                      size: 60,
-                    ),
-                    Text(
-                      ' $temperature',
-                      style: TextStyle(
-                          fontSize: 60,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                    )
-                  ],
-                ),
-                Text(
-                  '$temp_maxº/$temp_minº Feels like $feelsLikeº',
-                  style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  'Calor do cão',
-                  style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  height: 40,
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(12),
-                    ),
-                  ),
-                  width: MediaQuery.sizeOf(context).width * 0.9,
-                  height: MediaQuery.sizeOf(context).height * 0.07,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.water_drop_outlined,
-                        size: 30,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Precipitation'),
-                          Text(
-                            '100%',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      VerticalDivider(
-                        endIndent: 5,
-                        indent: 5,
-                      ),
-                      Icon(
-                        Icons.thunderstorm_outlined,
-                        size: 30,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('UV Index'),
-                          Text(
-                            'High',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 50,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                if (isReady)
+                  Column(
                     children: [
                       Text(
-                        'Next 3 Hours',
+                        'Thu, Apr 13, 2023',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 17),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
-                      Text('See more', style: TextStyle(color: Colors.blue))
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.network(
+                            'http://openweathermap.org/img/w/$icon_url.png',
+                          ),
+                          Text(
+                            ' $temperature',
+                            style: TextStyle(
+                                fontSize: 60,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
+                      Text(
+                        '$temp_maxº/$temp_minº Feels like $feelsLikeº',
+                        style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        description.toUpperCase(),
+                        style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: 40,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
+                          ),
+                        ),
+                        width: MediaQuery.sizeOf(context).width * 0.9,
+                        height: MediaQuery.sizeOf(context).height * 0.07,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.cloud,
+                              size: 30,
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Cloudiness'),
+                                Text(
+                                  '$clouds%',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            VerticalDivider(
+                              endIndent: 5,
+                              indent: 5,
+                            ),
+                            Icon(
+                              Icons.thunderstorm_outlined,
+                              size: 30,
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('UV Index'),
+                                Text(
+                                  'High',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 50,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Next 3 Hours',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 17),
+                            ),
+                            Text('See more',
+                                style: TextStyle(color: Colors.blue))
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          MiniInfo(),
+                          MiniInfo(),
+                          MiniInfo(),
+                        ],
+                      )
                     ],
                   ),
-                ),
-                SizedBox(
-                  height: 30,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    MiniInfo(),
-                    MiniInfo(),
-                    MiniInfo(),
-                  ],
-                )
               ],
             ),
+            if (!isReady)
+              Padding(
+                padding: const EdgeInsets.all(50.0),
+                child: Text(
+                  'Type a location and click the Get Weather button',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: MediaQuery.of(context).size.height * 0.05),
+                ),
+              )
           ],
         ),
       ),

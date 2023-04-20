@@ -72,7 +72,6 @@ class _MyHomePageState extends State<MyHomePage> {
         long = apiData[0]['lon'].toString();
       });
     }
-    print(lat);
   }
 
   @override
@@ -97,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // final now = DateTime.now();
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -110,8 +110,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     Radius.circular(12),
                   ),
                   child: Container(
-                    width: MediaQuery.sizeOf(context).width * 0.9,
-                    height: MediaQuery.sizeOf(context).height * 0.05,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: MediaQuery.of(context).size.height * 0.05,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
                       color: Colors.white,
