@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, non_constant_identifier_names
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, non_constant_identifier_names, unnecessary_overrides, annotate_overrides
 
 import 'package:flutter/material.dart';
 import 'dart:convert' as convert;
@@ -17,7 +17,8 @@ class HourlyScreen extends StatefulWidget {
   State<HourlyScreen> createState() => _HourlyScreenState();
 }
 
-class _HourlyScreenState extends State<HourlyScreen> {
+class _HourlyScreenState extends State<HourlyScreen>
+    with AutomaticKeepAliveClientMixin<HourlyScreen> {
   int temperature = 0;
   int feelsLike = 0;
   int temp_min = 0;
@@ -27,17 +28,24 @@ class _HourlyScreenState extends State<HourlyScreen> {
   String icon_url = '';
   int date = 0;
   bool isReady = false;
+  List nextHours = [];
 
   Future getWeather(String latTemp, String longTemp) async {
     var apikey = 'f47d0c7f86f35258f275abc8fa10f6d5';
     var url =
         'https://api.openweathermap.org/data/2.5/weather?lat=$latTemp&lon=$longTemp&appid=$apikey&units=metric';
 
+    var url2 =
+        'https://api.openweathermap.org/data/2.5/forecast?lat=$latTemp&lon=$longTemp&appid=$apikey&units=metric';
+
     http.Response response = await http.get(Uri.parse(url));
+    http.Response response2 = await http.get(Uri.parse(url2));
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 && response2.statusCode == 200) {
       var apiData = convert.jsonDecode(response.body);
+      var apiData2 = convert.jsonDecode(response2.body);
 
+      print(apiData2);
       setState(() {
         temperature = apiData['main']['temp'].round();
         feelsLike = apiData['main']['feels_like'].round();
@@ -47,18 +55,19 @@ class _HourlyScreenState extends State<HourlyScreen> {
         description = apiData['weather'][0]['description'];
         icon_url = apiData["weather"][0]["icon"];
         date = apiData['dt'];
+
         isReady = true;
       });
     }
   }
 
-  @override
   void initState() {
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Padding(
@@ -125,7 +134,7 @@ class _HourlyScreenState extends State<HourlyScreen> {
                             'http://openweathermap.org/img/w/$icon_url.png',
                           ),
                           Text(
-                            ' $temperature',
+                            ' $temperatureº',
                             style: TextStyle(
                                 fontSize: 60,
                                 color: Colors.white,
@@ -251,4 +260,7 @@ class _HourlyScreenState extends State<HourlyScreen> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
