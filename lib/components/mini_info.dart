@@ -3,7 +3,15 @@
 import 'package:flutter/material.dart';
 
 class MiniInfo extends StatelessWidget {
-  const MiniInfo({super.key});
+  const MiniInfo(
+      {super.key,
+      required this.hour,
+      required this.temp,
+      required this.iconURL});
+
+  final String hour;
+  final int temp;
+  final String iconURL;
 
   @override
   Widget build(BuildContext context) {
@@ -18,14 +26,13 @@ class MiniInfo extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           Text(
-            '16:00',
+            hour.substring(11, 16),
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          Icon(
-            Icons.wb_sunny_outlined,
-            size: 60,
+          Image.network(
+            'http://openweathermap.org/img/w/$iconURL.png',
           ),
-          Text('29ºC',
+          Text('$tempºC',
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
         ],
       ),

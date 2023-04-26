@@ -19,7 +19,7 @@ class WeeklyScreen extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: Text(
-                      'Next 7 Days',
+                      'Next 5 Days',
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

@@ -99,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Center(
               child: Padding(
@@ -117,7 +117,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.white,
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
                           height: 40,
@@ -126,24 +127,24 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: Colors.white,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(12))),
-                          child: Center(
-                            child: TextField(
-                              textAlign: TextAlign.center,
-                              controller: textController,
-                              onChanged: (text) {
-                                getLocation(text);
-                                setState(() {
-                                  city = text;
-                                });
-                              },
-                              decoration: InputDecoration(
-                                hintText: 'Search location',
-                                hintStyle: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                ),
-                                border: InputBorder.none,
+                          child: TextField(
+                            textAlign: TextAlign.center,
+                            controller: textController,
+                            style: TextStyle(fontSize: 20),
+                            maxLines: 1,
+                            onChanged: (text) {
+                              getLocation(text);
+                              setState(() {
+                                city = text;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'Search location',
+                              hintStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
                               ),
+                              border: InputBorder.none,
                             ),
                           ),
                         ),
@@ -167,7 +168,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 controller: controller,
                 children: [
                   HourlyScreen(
-                    city: city,
                     lat: lat,
                     long: long,
                   ),

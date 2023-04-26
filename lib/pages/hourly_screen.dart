@@ -5,13 +5,12 @@ import 'dart:convert' as convert;
 
 import '../components/mini_info.dart';
 import 'package:http/http.dart' as http;
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class HourlyScreen extends StatefulWidget {
-  const HourlyScreen(
-      {super.key, required this.city, required this.lat, required this.long});
+  const HourlyScreen({super.key, required this.lat, required this.long});
   final String lat;
   final String long;
-  final String city;
 
   @override
   State<HourlyScreen> createState() => _HourlyScreenState();
@@ -26,8 +25,13 @@ class _HourlyScreenState extends State<HourlyScreen>
   int clouds = 0;
   String description = '';
   String icon_url = '';
+  String country_code = '';
+  String city = '';
   int date = 0;
   bool isReady = false;
+  bool isLoading = false;
+  double wind_speed = 0.0;
+  DateTime now = DateTime.now().toLocal();
   List nextHours = [];
 
   Future getWeather(String latTemp, String longTemp) async {
@@ -36,7 +40,7 @@ class _HourlyScreenState extends State<HourlyScreen>
         'https://api.openweathermap.org/data/2.5/weather?lat=$latTemp&lon=$longTemp&appid=$apikey&units=metric';
 
     var url2 =
-        'https://api.openweathermap.org/data/2.5/forecast?lat=$latTemp&lon=$longTemp&appid=$apikey&units=metric';
+        'https://api.openweathermap.org/data/2.5/forecast?lat=$latTemp&lon=$longTemp&cnt=3&appid=$apikey&units=metric';
 
     http.Response response = await http.get(Uri.parse(url));
     http.Response response2 = await http.get(Uri.parse(url2));
@@ -45,18 +49,23 @@ class _HourlyScreenState extends State<HourlyScreen>
       var apiData = convert.jsonDecode(response.body);
       var apiData2 = convert.jsonDecode(response2.body);
 
-      print(apiData2);
       setState(() {
+        now = DateTime.now().toLocal();
         temperature = apiData['main']['temp'].round();
         feelsLike = apiData['main']['feels_like'].round();
         temp_min = apiData['main']['temp_min'].round();
         temp_max = apiData['main']['temp_max'].round();
+        city = apiData['name'];
         clouds = apiData['clouds']['all'];
         description = apiData['weather'][0]['description'];
         icon_url = apiData["weather"][0]["icon"];
         date = apiData['dt'];
+        wind_speed = apiData['wind']['speed'];
+        country_code = apiData['sys']['country'];
+        nextHours = apiData2['list'];
 
         isReady = true;
+        isLoading = false;
       });
     }
   }
@@ -85,7 +94,7 @@ class _HourlyScreenState extends State<HourlyScreen>
                       size: 20,
                     ),
                     Text(
-                      ' ${widget.city}',
+                      ' $city',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -98,6 +107,10 @@ class _HourlyScreenState extends State<HourlyScreen>
                     GestureDetector(
                       onTap: () {
                         getWeather(widget.lat, widget.long);
+                        setState(() {
+                          isLoading = true;
+                          isReady = false;
+                        });
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -117,7 +130,7 @@ class _HourlyScreenState extends State<HourlyScreen>
                   Column(
                     children: [
                       Text(
-                        'Thu, Apr 13, 2023',
+                        '${now.hour}:${now.minute} - ${now.day.toString()}/${now.month.toString()}/${now.year.toString()}',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -192,16 +205,16 @@ class _HourlyScreenState extends State<HourlyScreen>
                               indent: 5,
                             ),
                             Icon(
-                              Icons.thunderstorm_outlined,
+                              Icons.wind_power_outlined,
                               size: 30,
                             ),
                             Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('UV Index'),
+                                Text('Wind Speed'),
                                 Text(
-                                  'High',
+                                  '${wind_speed.toString()} m/s',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -218,7 +231,7 @@ class _HourlyScreenState extends State<HourlyScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Next 3 Hours',
+                              'Next Hours',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -235,16 +248,28 @@ class _HourlyScreenState extends State<HourlyScreen>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          MiniInfo(),
-                          MiniInfo(),
-                          MiniInfo(),
+                          MiniInfo(
+                            hour: nextHours[0]['dt_txt'],
+                            temp: nextHours[0]['main']['temp'].round(),
+                            iconURL: nextHours[0]['weather'][0]['icon'],
+                          ),
+                          MiniInfo(
+                            hour: nextHours[1]['dt_txt'],
+                            temp: nextHours[1]['main']['temp'].round(),
+                            iconURL: nextHours[1]['weather'][0]['icon'],
+                          ),
+                          MiniInfo(
+                            hour: nextHours[2]['dt_txt'],
+                            temp: nextHours[2]['main']['temp'].round(),
+                            iconURL: nextHours[2]['weather'][0]['icon'],
+                          ),
                         ],
                       )
                     ],
                   ),
               ],
             ),
-            if (!isReady)
+            if (!isReady & !isLoading)
               Padding(
                 padding: const EdgeInsets.all(50.0),
                 child: Text(
@@ -254,7 +279,15 @@ class _HourlyScreenState extends State<HourlyScreen>
                       color: Colors.white,
                       fontSize: MediaQuery.of(context).size.height * 0.05),
                 ),
-              )
+              ),
+            if (isLoading)
+              Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 200.0),
+                  child: Center(
+                    child: LoadingAnimationWidget.twoRotatingArc(
+                        color: Colors.white,
+                        size: MediaQuery.of(context).size.height * 0.1),
+                  )),
           ],
         ),
       ),
